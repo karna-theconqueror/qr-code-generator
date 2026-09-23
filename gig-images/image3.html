@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{width:1280px;height:769px;font-family:'Segoe UI',system-ui,sans-serif;background:linear-gradient(135deg,#0f0f23 0%,#1a1a3e 50%,#2d1b69 100%);overflow:hidden;position:relative}
+.glow{position:absolute;width:300px;height:300px;border-radius:50%;filter:blur(100px);opacity:0.2}
+.g1{background:#eab308;top:-50px;left:300px}
+.g2{background:#6366f1;bottom:-50px;right:200px}
+.container{position:relative;z-index:1;height:100%;padding:50px 60px;display:flex;flex-direction:column}
+.header{text-align:center;margin-bottom:40px}
+.badge{display:inline-flex;align-items:center;gap:8px;background:rgba(234,179,8,0.15);border:1px solid rgba(234,179,8,0.3);border-radius:20px;padding:6px 16px;font-size:12px;color:#fde047;margin-bottom:16px}
+h2{font-size:36px;font-weight:800;color:#fff}
+.packages{display:flex;gap:24px;flex:1;align-items:stretch}
+.pkg{flex:1;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);border-radius:16px;padding:32px 24px;display:flex;flex-direction:column;position:relative}
+.pkg.featured{border-color:rgba(99,102,241,0.4);background:rgba(99,102,241,0.05)}
+.pkg-badge{position:absolute;top:-12px;left:50%;transform:translateX(-50%);background:linear-gradient(135deg,#6366f1,#8b5cf6);color:#fff;font-size:11px;font-weight:700;padding:4px 16px;border-radius:12px;text-transform:uppercase;letter-spacing:1px}
+.pkg-name{font-size:14px;color:#94a3b8;text-transform:uppercase;letter-spacing:1px;margin-bottom:8px}
+.pkg-price{font-size:42px;font-weight:800;color:#fff;margin-bottom:4px}
+.pkg-price span{font-size:16px;font-weight:400;color:#64748b}
+.pkg-desc{font-size:13px;color:#64748b;margin-bottom:20px;padding-bottom:20px;border-bottom:1px solid rgba(255,255,255,0.06)}
+.pkg-features{list-style:none;display:flex;flex-direction:column;gap:10px;flex:1}
+.pkg-features li{color:#c7d2fe;font-size:13px;display:flex;align-items:center;gap:8px}
+.pkg-features li::before{content:'✓';color:#22c55e;font-weight:700;font-size:14px}
+.footer{text-align:center;margin-top:24px;color:#64748b;font-size:13px}
+.footer span{color:#fde047}
+</style>
+</head>
+<body>
+<div class="glow g1"></div>
+<div class="glow g2"></div>
+<div class="container">
+  <div class="header">
+    <div class="badge">✦ Simple Pricing</div>
+    <h2>Choose Your Package</h2>
+  </div>
+  <div class="packages">
+    <div class="pkg">
+      <div class="pkg-name">Basic</div>
+      <div class="pkg-price">$20</div>
+      <div class="pkg-desc">Single QR</div>
+      <ul class="pkg-features">
+        <li>1 custom QR code</li>
+        <li>PNG + SVG files</li>
+        <li>Custom colors & logo</li>
+        <li>Basic analytics</li>
+        <li>Dynamic link</li>
+        <li>1 revision • 1-day delivery</li>
+      </ul>
+    </div>
+    <div class="pkg featured">
+      <div class="pkg-badge">Most Popular</div>
+      <div class="pkg-name">Standard</div>
+      <div class="pkg-price">$50</div>
+      <div class="pkg-desc">Pro Pack</div>
+      <ul class="pkg-features">
+        <li>5 custom QR codes</li>
+        <li>PNG + SVG files</li>
+        <li>Custom colors & logo</li>
+        <li>Full analytics dashboard</li>
+        <li>Device/Browser/OS tracking</li>
+        <li>3 revisions • 2-day delivery</li>
+      </ul>
+    </div>
+    <div class="pkg">
+      <div class="pkg-name">Premium</div>
+      <div class="pkg-price">$100</div>
+      <div class="pkg-desc">Business Pack</div>
+      <ul class="pkg-features">
+        <li>15 custom QR codes</li>
+        <li>PNG + SVG files</li>
+        <li>Custom colors & logo</li>
+        <li>Advanced analytics</li>
+        <li>7-day trends & breakdowns</li>
+        <li>5 revisions • 3-day delivery</li>
+      </ul>
+    </div>
+  </div>
+  <div class="footer">Dynamic QR codes • <span>Lifetime analytics</span> • No monthly fees</div>
+</div>
+</body>
+</html>

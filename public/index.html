@@ -1,0 +1,794 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>QRCode Analytics - Generator & Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#f8fafc;--card:#fff;--border:#e2e8f0;--text:#1e293b;
+  --text-muted:#64748b;--accent:#6366f1;--accent-hover:#4f46e5;
+  --success:#22c55e;--danger:#ef4444;--warning:#f59e0b;
+}
+body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
+a{color:var(--accent);text-decoration:none}
+a:hover{text-decoration:underline}
+
+/* Layout */
+.app{display:flex;flex-direction:column;min-height:100vh}
+.header{background:var(--card);border-bottom:1px solid var(--border);padding:0 24px;height:60px;display:flex;align-items:center;gap:16px;position:sticky;top:0;z-index:100}
+.logo{display:flex;align-items:center;gap:8px;font-weight:700;font-size:18px;color:var(--accent)}
+.logo i{font-size:20px}
+.tabs{display:flex;gap:4px}
+.tab-btn{padding:8px 16px;border:none;background:transparent;color:var(--text-muted);font-size:13px;font-weight:600;cursor:pointer;border-radius:6px;transition:all .15s}
+.tab-btn:hover{color:var(--text);background:#f1f5f9}
+.tab-btn.active{color:var(--accent);background:rgba(99,102,241,.1)}
+.main{display:flex;flex:1}
+.sidebar{width:280px;background:var(--card);border-right:1px solid var(--border);padding:20px;overflow-y:auto;flex-shrink:0}
+.sidebar-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--text-muted);margin-bottom:16px}
+.content{flex:1;padding:32px;overflow-y:auto}
+
+/* Forms */
+.form-group{margin-bottom:16px}
+label{display:block;font-size:12px;font-weight:500;color:var(--text);margin-bottom:6px}
+input[type="text"],input[type="url"],input[type="email"],input[type="tel"],input[type="number"],textarea,select{
+  width:100%;padding:10px 12px;border:1px solid var(--border);border-radius:8px;font-size:13px;font-family:inherit;background:var(--card);color:var(--text);transition:border .15s,box-shadow .15s
+}
+input:focus,textarea:focus,select:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px rgba(99,102,241,.15)}
+input[type="color"]{width:50px;height:36px;border:none;border-radius:8px;cursor:pointer;padding:2px}
+.range-wrap{display:flex;align-items:center;gap:12px}
+input[type="range"]{flex:1;accent-color:var(--accent)}
+.range-value{min-width:40px;text-align:right;font-size:13px;color:var(--text-muted)}
+
+/* Color pickers row */
+.color-row{display:flex;gap:16px}
+.color-item{display:flex;flex-direction:column;gap:4px;flex:1}
+
+/* Preview */
+.preview-area{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:24px;text-align:center;min-height:200px;display:flex;align-items:center;justify-content:center}
+.preview-area img,.preview-area canvas{max-width:100%;height:auto}
+.preview-placeholder{color:var(--text-muted);font-size:14px}
+
+/* Buttons */
+.btn{display:inline-flex;align-items:center;gap:8px;padding:10px 20px;border:none;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;transition:all .15s;font-family:inherit}
+.btn i{font-size:12px}
+.btn-primary{background:var(--accent);color:#fff}
+.btn-primary:hover{background:var(--accent-hover)}
+.btn-secondary{background:#f1f5f9;color:var(--text);border:1px solid var(--border)}
+.btn-secondary:hover{background:#e2e8f0}
+.btn-success{background:var(--success);color:#fff}
+.btn-success:hover{background:#16a34a}
+.btn-danger{background:var(--danger);color:#fff}
+.btn-danger:hover{background:#dc2626}
+.btn-outline{background:transparent;border:1px solid var(--border);color:var(--text)}
+.btn-outline:hover{background:#f1f5f9}
+.btn-sm{padding:6px 12px;font-size:12px}
+.btn-group{display:flex;gap:8px;flex-wrap:wrap}
+
+/* QR Grid */
+.qr-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:16px}
+.qr-card{background:var(--card);border:1px solid var(--border);border-radius:12px;overflow:hidden;transition:all .2s}
+.qr-card:hover{box-shadow:0 8px 24px rgba(0,0,0,.08);transform:translateY(-2px)}
+.qr-card-img{width:100%;aspect-ratio:1;background:#f8fafc;display:flex;align-items:center;justify-content:center}
+.qr-card-img img{width:80%;height:80%}
+.qr-card-body{padding:16px}
+.qr-card-name{font-size:14px;font-weight:600;color:var(--text);margin-bottom:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.qr-card-meta{display:flex;gap:12px;font-size:11px;color:var(--text-muted);margin-bottom:12px}
+.qr-card-actions{display:flex;gap:6px}
+.qr-card-actions .btn{flex:1;justify-content:center;font-size:11px;padding:6px 8px}
+
+/* Empty state */
+.empty-state{text-align:center;padding:60px 20px;color:var(--text-muted)}
+.empty-state i{font-size:48px;margin-bottom:16px;color:var(--border)}
+.empty-state h3{font-size:16px;margin-bottom:8px;color:var(--text)}
+.empty-state p{font-size:13px}
+
+/* Analytics */
+.analytics-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px;margin-bottom:24px}
+.stat-card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:20px}
+.stat-value{font-size:28px;font-weight:800;color:var(--text);margin-bottom:4px}
+.stat-label{font-size:12px;color:var(--text-muted);text-transform:uppercase;letter-spacing:.5px}
+.charts-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:16px}
+.chart-card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:20px}
+.chart-title{font-size:13px;font-weight:600;margin-bottom:16px;color:var(--text)}
+.bar-chart{display:flex;align-items:flex-end;gap:8px;height:150px}
+.bar-item{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px}
+.bar{width:100%;background:linear-gradient(180deg,var(--accent),#a855f7);border-radius:4px 4px 0 0;transition:height .3s;min-height:4px}
+.bar-label{font-size:10px;color:var(--text-muted);text-align:center}
+.bar-value{font-size:11px;font-weight:600;color:var(--text)}
+.pie-chart{display:flex;justify-content:center;align-items:center;gap:24px;height:180px;position:relative}
+.pie-svg{width:160px;height:160px;transform:rotate(-90deg)}
+.pie-bg{fill:none;stroke:var(--border);stroke-width:12}
+.pie-progress{fill:none;stroke:var(--accent);stroke-width:12;stroke-linecap:round;transition:stroke-dashoffset .5s}
+.pie-legend{display:flex;flex-direction:column;gap:8px}
+.legend-item{display:flex;align-items:center;gap:8px;font-size:12px}
+.legend-color{width:12px;height:12px;border-radius:3px}
+.table-wrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:12px}
+th{text-align:left;padding:10px 12px;color:var(--text-muted);font-weight:600;font-size:11px;text-transform:uppercase;letter-spacing:.5px;border-bottom:1px solid var(--border)}
+td{padding:10px 12px;border-bottom:1px solid var(--border);color:var(--text)}
+tr:hover td{background:#f8fafc}
+
+/* Select dropdown for analytics */
+.select-wrap{margin-bottom:24px}
+.select-wrap select{min-width:280px}
+
+/* Section visibility */
+.tab-panel{display:none}
+.tab-panel.active{display:block;animation:fadeIn .2s}
+@keyframes fadeIn{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:translateY(0)}}
+
+/* Type-specific fields */
+.type-fields{display:none}
+.type-fields.active{display:block}
+
+/* Modal */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);display:flex;align-items:center;justify-content:center;z-index:1000;opacity:0;visibility:hidden;transition:all .2s}
+.modal-overlay.active{opacity:1;visibility:visible}
+.modal{background:var(--card);border-radius:16px;padding:24px;width:90%;max-width:500px;box-shadow:0 24px 48px rgba(0,0,0,.2);transform:scale(.95);transition:transform .2s}
+.modal-overlay.active .modal{transform:scale(1)}
+.modal-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px}
+.modal-title{font-size:16px;font-weight:700}
+.modal-close{background:none;border:none;font-size:20px;color:var(--text-muted);cursor:pointer}
+
+/* Scrollbar */
+::-webkit-scrollbar{width:8px;height:8px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--border);border-radius:4px}
+::-webkit-scrollbar-thumb:hover{background:var(--text-muted)}
+</style>
+</head>
+<body>
+<div class="app">
+  <header class="header">
+    <div class="logo"><i class="fas fa-qrcode"></i> QRCode Analytics</div>
+    <div class="tabs">
+      <button class="tab-btn active" data-tab="generator"><i class="fas fa-magic"></i> Generator</button>
+      <button class="tab-btn" data-tab="dashboard"><i class="fas fa-th-large"></i> Dashboard</button>
+      <button class="tab-btn" data-tab="analytics"><i class="fas fa-chart-bar"></i> Analytics</button>
+    </div>
+  </header>
+  <div class="main">
+    <aside class="sidebar">
+      <div class="sidebar-title">QR Generator</div>
+      <div class="form-group">
+        <label>Name</label>
+        <input type="text" id="qrName" placeholder="My Website QR">
+      </div>
+      <div class="form-group">
+        <label>Type</label>
+        <select id="qrType">
+          <option value="url">URL / Link</option>
+          <option value="text">Plain Text</option>
+          <option value="email">Email</option>
+          <option value="phone">Phone Number</option>
+          <option value="sms">SMS</option>
+          <option value="wifi">WiFi Network</option>
+          <option value="vcard">Contact (vCard)</option>
+        </select>
+      </div>
+
+      <!-- Type-specific fields -->
+      <div class="type-fields active" id="field-url">
+        <div class="form-group">
+          <label>URL</label>
+          <input type="url" id="urlContent" placeholder="https://example.com" value="https://example.com">
+        </div>
+      </div>
+      <div class="type-fields" id="field-text">
+        <div class="form-group">
+          <label>Text</label>
+          <textarea id="textContent" rows="3" placeholder="Enter your text..."></textarea>
+        </div>
+      </div>
+      <div class="type-fields" id="field-email">
+        <div class="form-group"><label>Email</label><input type="email" id="emailTo" placeholder="user@example.com"></div>
+        <div class="form-group"><label>Subject</label><input type="text" id="emailSubject" placeholder="Hello"></div>
+        <div class="form-group"><label>Body</label><textarea id="emailBody" rows="3" placeholder="Message..."></textarea></div>
+      </div>
+      <div class="type-fields" id="field-phone">
+        <div class="form-group"><label>Phone Number</label><input type="tel" id="phoneNumber" placeholder="+1234567890"></div>
+      </div>
+      <div class="type-fields" id="field-sms">
+        <div class="form-group"><label>Phone Number</label><input type="tel" id="smsNumber" placeholder="+1234567890"></div>
+        <div class="form-group"><label>Message</label><textarea id="smsBody" rows="2" placeholder="Text message..."></textarea></div>
+      </div>
+      <div class="type-fields" id="field-wifi">
+        <div class="form-group"><label>SSID (Network Name)</label><input type="text" id="wifiSsid" placeholder="MyWiFi"></div>
+        <div class="form-group"><label>Password</label><input type="text" id="wifiPass" placeholder="password123"></div>
+        <div class="form-group"><label>Encryption</label><select id="wifiEnc"><option value="WPA">WPA/WPA2</option><option value="WEP">WEP</option><option value="nopass">No Password</option></select></div>
+      </div>
+      <div class="type-fields" id="field-vcard">
+        <div class="form-group"><label>Full Name</label><input type="text" id="vcName" placeholder="John Doe"></div>
+        <div class="form-group"><label>Organization</label><input type="text" id="vcOrg" placeholder="Company Inc."></div>
+        <div class="form-group"><label>Phone</label><input type="tel" id="vcPhone" placeholder="+1234567890"></div>
+        <div class="form-group"><label>Email</label><input type="email" id="vcEmail" placeholder="john@company.com"></div>
+        <div class="form-group"><label>URL</label><input type="url" id="vcUrl" placeholder="https://company.com"></div>
+        <div class="form-group"><label>Address</label><textarea id="vcAddr" rows="2" placeholder="123 Street, City, Country"></textarea></div>
+      </div>
+
+      <div class="sidebar-title">Style</div>
+      <div class="color-row">
+        <div class="color-item">
+          <label>Foreground</label>
+          <input type="color" id="fgColor" value="#1e293b">
+        </div>
+        <div class="color-item">
+          <label>Background</label>
+          <input type="color" id="bgColor" value="#ffffff">
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Size: <span class="range-value" id="sizeValue">300</span>px</label>
+        <div class="range-wrap"><input type="range" id="qrSize" min="100" max="1000" value="300"><span class="range-value" id="sizeValue">300</span></div>
+      </div>
+      <div class="form-group">
+        <label>Logo (optional)</label>
+        <input type="file" id="logoFile" accept="image/*">
+        <div style="font-size:11px;color:var(--text-muted);margin-top:4px">Max 100KB. Centered on QR.</div>
+      </div>
+
+      <div class="btn-group" style="margin-top:8px">
+        <button class="btn btn-primary" onclick="generatePreview()"><i class="fas fa-sync"></i> Preview</button>
+        <button class="btn btn-success" onclick="downloadPNG()"><i class="fas fa-download"></i> PNG</button>
+        <button class="btn btn-secondary" onclick="downloadSVG()"><i class="fas fa-file-code"></i> SVG</button>
+        <button class="btn btn-primary" onclick="saveQR()"><i class="fas fa-save"></i> Save</button>
+      </div>
+    </aside>
+
+    <main class="content">
+      <!-- Generator Tab -->
+      <section class="tab-panel active" id="panel-generator">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:24px">
+          <div>
+            <h1 style="font-size:24px;font-weight:700;margin-bottom:4px">Create QR Code</h1>
+            <p style="color:var(--text-muted);font-size:14px">Generate, customize, and track QR codes with analytics</p>
+          </div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 420px;gap:32px;align-items:start">
+          <div>
+            <div class="preview-area" id="previewArea">
+              <div class="preview-placeholder" id="previewPlaceholder">
+                <i class="fas fa-qrcode" style="font-size:32px;margin-bottom:8px;display:block"></i>
+                Fill the form and click Generate
+              </div>
+              <img id="previewImg" style="display:none;max-width:300px">
+              <canvas id="previewCanvas" style="display:none;max-width:300px"></canvas>
+            </div>
+            <div class="btn-group" style="margin-top:16px;justify-content:center">
+              <button class="btn btn-primary" style="padding:14px 32px;font-size:15px" onclick="generatePreview()"><i class="fas fa-magic"></i> Generate QR Code</button>
+              <button class="btn btn-success" onclick="downloadPNG()"><i class="fas fa-download"></i> PNG</button>
+              <button class="btn btn-secondary" onclick="downloadSVG()"><i class="fas fa-file-code"></i> SVG</button>
+              <button class="btn btn-primary" onclick="saveQR()"><i class="fas fa-save"></i> Save to Dashboard</button>
+            </div>
+          </div>
+          <div style="position:sticky;top:80px">
+            <!-- Actions already in sidebar -->
+          </div>
+        </div>
+      </section>
+
+      <!-- Dashboard Tab -->
+      <section class="tab-panel" id="panel-dashboard">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:24px">
+          <div>
+            <h1 style="font-size:24px;font-weight:700;margin-bottom-4px">Your QR Codes</h1>
+            <p style="color:var(--text-muted);font-size:14px">Manage and track all your QR codes</p>
+          </div>
+        </div>
+        <div id="qrGrid" class="qr-grid"></div>
+        <div class="empty-state" id="emptyState" style="display:none">
+          <i class="fas fa-qrcode"></i>
+          <h3>No QR codes yet</h3>
+          <p>Create your first QR code in the Generator tab</p>
+          <button class="btn btn-primary" style="margin-top:16px" onclick="switchTab('generator')"><i class="fas fa-plus"></i> Create QR Code</button>
+        </div>
+      </section>
+
+      <!-- Analytics Tab -->
+      <section class="tab-panel" id="panel-analytics">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:24px">
+          <div>
+            <h1 style="font-size:24px;font-weight:700;margin-bottom:4px">Analytics</h1>
+            <p style="color:var(--text-muted);font-size:14px">Track scans and understand your audience</p>
+          </div>
+        </div>
+        <div class="select-wrap">
+          <select id="analyticsSelect"><option value="">Select a QR code to view analytics</option></select>
+        </div>
+        <div class="analytics-grid" id="analyticsStats" style="display:none">
+          <div class="stat-card"><div class="stat-value" id="statTotal">0</div><div class="stat-label">Total Scans</div></div>
+          <div class="stat-card"><div class="stat-value" id="statToday">0</div><div class="stat-label">Today</div></div>
+          <div class="stat-card"><div class="stat-value" id="statDevice">-</div><div class="stat-label">Top Device</div></div>
+          <div class="stat-card"><div class="stat-value" id="statBrowser">-</div><div class="stat-label">Top Browser</div></div>
+        </div>
+        <div class="charts-grid" id="analyticsCharts" style="display:none">
+          <div class="chart-card">
+            <div class="chart-title">Last 7 Days</div>
+            <div class="bar-chart" id="chartDays"></div>
+          </div>
+          <div class="chart-card">
+            <div class="chart-title">By Device</div>
+            <div class="pie-chart" id="chartDevice">
+              <svg class="pie-svg" viewBox="0 0 160 160"><circle class="pie-bg" cx="80" cy="80" r="70"></circle><circle class="pie-progress" cx="80" cy="80" r="70" stroke-dasharray="440" stroke-dashoffset="440"></circle></svg>
+              <div class="pie-legend" id="legendDevice"></div>
+            </div>
+          </div>
+          <div class="chart-card">
+            <div class="chart-title">By Browser</div>
+            <div class="pie-chart" id="chartBrowser">
+              <svg class="pie-svg" viewBox="0 0 160 160"><circle class="pie-bg" cx="80" cy="80" r="70"></circle><circle class="pie-progress" cx="80" cy="80" r="70" stroke-dasharray="440" stroke-dashoffset="440"></circle></svg>
+              <div class="pie-legend" id="legendBrowser"></div>
+            </div>
+          </div>
+          <div class="chart-card">
+            <div class="chart-title">By OS</div>
+            <div class="pie-chart" id="chartOS">
+              <svg class="pie-svg" viewBox="0 0 160 160"><circle class="pie-bg" cx="80" cy="80" r="70"></circle><circle class="pie-progress" cx="80" cy="80" r="70" stroke-dasharray="440" stroke-dashoffset="440"></circle></svg>
+              <div class="pie-legend" id="legendOS"></div>
+            </div>
+          </div>
+        </div>
+        <div class="chart-card" style="margin-top:16px;display:none" id="recentScansCard">
+          <div class="chart-title">Recent Scans</div>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>Time</th><th>Device</th><th>Browser</th><th>OS</th><th>IP</th></tr></thead>
+              <tbody id="recentScansBody"></tbody>
+            </table>
+          </div>
+        </div>
+        <div class="empty-state" id="analyticsEmpty">
+          <i class="fas fa-chart-bar"></i>
+          <h3>No analytics yet</h3>
+          <p>Select a QR code from the dropdown to view analytics</p>
+        </div>
+      </section>
+    </main>
+  </div>
+</div>
+
+<!-- Edit Modal -->
+<div class="modal-overlay" id="editModal">
+  <div class="modal">
+    <div class="modal-header">
+      <h3 class="modal-title">Edit QR Code</h3>
+      <button class="modal-close" onclick="closeEditModal()">&times;</button>
+    </div>
+    <div class="form-group"><label>Name</label><input type="text" id="editName"></div>
+    <div class="form-group"><label>Content</label><textarea id="editContent" rows="3"></textarea></div>
+    <div class="btn-group" style="justify-content:flex-end;margin-top:16px">
+      <button class="btn btn-secondary" onclick="closeEditModal()">Cancel</button>
+      <button class="btn btn-primary" onclick="saveEdit()">Save Changes</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ============ STATE ============
+let currentQR = null;
+let logoDataUrl = null;
+let editingQRId = null;
+
+// ============ INIT ============
+document.addEventListener('DOMContentLoaded', () => {
+  initTabs();
+  initTypeFields();
+  initColorInputs();
+  initSizeSlider();
+  loadQRs();
+  loadAnalyticsSelect();
+});
+
+// ============ TABS ============
+function initTabs() {
+  document.querySelectorAll('.tab-btn').forEach(btn => {
+    btn.addEventListener('click', () => switchTab(btn.dataset.tab));
+  });
+}
+function switchTab(tab) {
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.toggle('active', b.dataset.tab === tab));
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.toggle('active', p.id === 'panel-' + tab));
+  if (tab === 'dashboard') loadQRs();
+  if (tab === 'analytics') loadAnalyticsSelect();
+}
+
+// ============ TYPE FIELDS ============
+function initTypeFields() {
+  const select = document.getElementById('qrType');
+  select.addEventListener('change', () => {
+    document.querySelectorAll('.type-fields').forEach(f => f.classList.remove('active'));
+    document.getElementById('field-' + select.value).classList.add('active');
+    generatePreview();
+  });
+}
+
+// ============ COLOR INPUTS ============
+function initColorInputs() {
+  document.getElementById('fgColor').addEventListener('input', generatePreview);
+  document.getElementById('bgColor').addEventListener('input', generatePreview);
+}
+
+// ============ SIZE SLIDER ============
+function initSizeSlider() {
+  const slider = document.getElementById('qrSize');
+  const value = document.getElementById('sizeValue');
+  slider.addEventListener('input', () => {
+    value.textContent = slider.value;
+    generatePreview();
+  });
+}
+
+// ============ LOGO UPLOAD ============
+document.getElementById('logoFile').addEventListener('change', e => {
+  const file = e.target.files[0];
+  if (!file) return;
+  if (file.size > 100000) { alert('Logo must be under 100KB'); e.target.value = ''; return; }
+  const reader = new FileReader();
+  reader.onload = e => { logoDataUrl = e.target.result; generatePreview(); };
+  reader.readAsDataURL(file);
+});
+
+// ============ CONTENT BUILDER ============
+function buildContent() {
+  const type = document.getElementById('qrType').value;
+  switch (type) {
+    case 'url': return document.getElementById('urlContent').value.trim();
+    case 'text': return document.getElementById('textContent').value.trim();
+    case 'email': {
+      const to = document.getElementById('emailTo').value.trim();
+      const subj = document.getElementById('emailSubject').value.trim();
+      const body = document.getElementById('emailBody').value.trim();
+      return `mailto:${to}${subj ? '?subject=' + encodeURIComponent(subj) : ''}${body ? (subj ? '&' : '?') + 'body=' + encodeURIComponent(body) : ''}`;
+    }
+    case 'phone': return 'tel:' + document.getElementById('phoneNumber').value.trim();
+    case 'sms': {
+      const num = document.getElementById('smsNumber').value.trim();
+      const body = document.getElementById('smsBody').value.trim();
+      return `sms:${num}${body ? '?body=' + encodeURIComponent(body) : ''}`;
+    }
+    case 'wifi': {
+      const ssid = document.getElementById('wifiSsid').value.trim();
+      const pass = document.getElementById('wifiPass').value.trim();
+      const enc = document.getElementById('wifiEnc').value;
+      return `WIFI:T:${enc};S:${ssid};P:${pass};;`;
+    }
+    case 'vcard': {
+      const name = document.getElementById('vcName').value.trim();
+      const org = document.getElementById('vcOrg').value.trim();
+      const phone = document.getElementById('vcPhone').value.trim();
+      const email = document.getElementById('vcEmail').value.trim();
+      const url = document.getElementById('vcUrl').value.trim();
+      const addr = document.getElementById('vcAddr').value.trim();
+      return `BEGIN:VCARD\nVERSION:3.0\nFN:${name}\nORG:${org}\nTEL:${phone}\nEMAIL:${email}\nURL:${url}\nADR:${addr}\nEND:VCARD`;
+    }
+    default: return '';
+  }
+}
+
+// ============ PREVIEW ============
+async function generatePreview() {
+  const content = buildContent();
+  if (!content) {
+    showPlaceholder();
+    return;
+  }
+  const size = parseInt(document.getElementById('qrSize').value);
+  const fg = document.getElementById('fgColor').value;
+  const bg = document.getElementById('bgColor').value;
+
+  try {
+    const canvas = document.getElementById('previewCanvas');
+    const ctx = canvas.getContext('2d');
+    canvas.width = size;
+    canvas.height = size;
+
+    // Generate QR on canvas using QRCode library
+    await QRCode.toCanvas(canvas, content, {
+      width: size,
+      color: { dark: fg, light: bg },
+      margin: 2
+    });
+
+    // Add logo if present
+    if (logoDataUrl) {
+      const logo = new Image();
+      logo.src = logoDataUrl;
+      await new Promise(r => { logo.onload = r; });
+      const logoSize = size * 0.2;
+      const x = (size - logoSize) / 2;
+      const y = (size - logoSize) / 2;
+      // White background behind logo
+      ctx.fillStyle = bg;
+      ctx.fillRect(x - 4, y - 4, logoSize + 8, logoSize + 8);
+      ctx.drawImage(logo, x, y, logoSize, logoSize);
+    }
+
+    document.getElementById('previewCanvas').style.display = 'block';
+    document.getElementById('previewImg').style.display = 'none';
+    document.getElementById('previewPlaceholder').style.display = 'none';
+    currentQR = { content, size, fg, bg, logo: logoDataUrl };
+  } catch (e) {
+    console.error(e);
+    showPlaceholder();
+  }
+}
+function showPlaceholder() {
+  document.getElementById('previewCanvas').style.display = 'none';
+  document.getElementById('previewImg').style.display = 'none';
+  document.getElementById('previewPlaceholder').style.display = 'block';
+  currentQR = null;
+}
+
+// ============ DOWNLOAD ============
+function downloadPNG() {
+  if (!currentQR) { alert('Generate preview first'); return; }
+  const canvas = document.getElementById('previewCanvas');
+  const link = document.createElement('a');
+  link.download = 'qrcode.png';
+  link.href = canvas.toDataURL('image/png');
+  link.click();
+}
+async function downloadSVG() {
+  const content = buildContent();
+  if (!content) { alert('Generate preview first'); return; }
+  const size = parseInt(document.getElementById('qrSize').value);
+  const fg = document.getElementById('fgColor').value;
+  const bg = document.getElementById('bgColor').value;
+  try {
+    const svg = await QRCode.toString(content, { type: 'svg', width: size, color: { dark: fg, light: bg }, margin: 2 });
+    const blob = new Blob([svg], { type: 'image/svg+xml' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.download = 'qrcode.svg';
+    link.href = url;
+    link.click();
+    URL.revokeObjectURL(url);
+  } catch (e) { alert('SVG generation failed'); }
+}
+
+// ============ SAVE QR ============
+async function saveQR() {
+  const name = document.getElementById('qrName').value.trim();
+  const content = buildContent();
+  if (!name) { alert('Enter a name'); return; }
+  if (!content) { alert('Enter content'); return; }
+
+  const style = {
+    fg: document.getElementById('fgColor').value,
+    bg: document.getElementById('bgColor').value,
+    size: parseInt(document.getElementById('qrSize').value),
+    logo: logoDataUrl
+  };
+  const type = document.getElementById('qrType').value;
+
+  try {
+    const res = await fetch('/api/qrs', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name, content, type, style })
+    });
+    const qr = await res.json();
+    alert('Saved! ' + qr._id);
+    loadQRs();
+    switchTab('dashboard');
+  } catch (e) { alert('Save failed'); }
+}
+
+// ============ LOAD QRs ============
+async function loadQRs() {
+  try {
+    const res = await fetch('/api/qrs');
+    const qrs = await res.json();
+    const grid = document.getElementById('qrGrid');
+    const empty = document.getElementById('emptyState');
+
+    if (!qrs.length) {
+      grid.innerHTML = '';
+      empty.style.display = 'block';
+      return;
+    }
+    empty.style.display = 'none';
+    grid.innerHTML = qrs.map(qr => `
+      <div class="qr-card" onclick="viewAnalytics('${qr._id}')">
+        <div class="qr-card-img">
+          <img src="/api/qrs/${qr._id}/generate?format=png" alt="${qr.name}" onerror="this.style.display='none'">
+        </div>
+        <div class="qr-card-body">
+          <div class="qr-card-name">${escapeHtml(qr.name)}</div>
+          <div class="qr-card-meta">
+            <span><i class="fas fa-tag"></i> ${qr.type.toUpperCase()}</span>
+            <span><i class="fas fa-chart-line"></i> ${qr.scans || 0} scans</span>
+          </div>
+          <div class="qr-card-actions">
+            <button class="btn btn-secondary btn-sm" onclick="event.stopPropagation();downloadPNGDirect('${qr._id}')"><i class="fas fa-image"></i> PNG</button>
+            <button class="btn btn-secondary btn-sm" onclick="event.stopPropagation();downloadSVGDirect('${qr._id}')"><i class="fas fa-code"></i> SVG</button>
+            <button class="btn btn-outline btn-sm" onclick="event.stopPropagation();copyLink('${qr._id}')"><i class="fas fa-link"></i> Link</button>
+            <button class="btn btn-outline btn-sm" onclick="event.stopPropagation();openEdit('${qr._id}')"><i class="fas fa-edit"></i></button>
+            <button class="btn btn-danger btn-sm" onclick="event.stopPropagation();deleteQR('${qr._id}')"><i class="fas fa-trash"></i></button>
+          </div>
+        </div>
+      </div>
+    `).join('');
+  } catch (e) { console.error(e); }
+}
+
+function escapeHtml(str) {
+  return String(str).replace(/&/g,'&').replace(/</g,'<').replace(/>/g,'>').replace(/"/g,'"');
+}
+
+// ============ DIRECT DOWNLOADS ============
+async function downloadPNGDirect(id) {
+  const res = await fetch(`/api/qrs/${id}/generate?format=png`);
+  const blob = await res.blob();
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = `qr-${id}.png`; a.click();
+  URL.revokeObjectURL(url);
+}
+async function downloadSVGDirect(id) {
+  const res = await fetch(`/api/qrs/${id}/generate?format=svg`);
+  const blob = await res.blob();
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = `qr-${id}.svg`; a.click();
+  URL.revokeObjectURL(url);
+}
+function copyLink(id) {
+  const url = window.location.origin + '/scan/' + id;
+  navigator.clipboard.writeText(url).then(() => alert('Copied: ' + url));
+}
+
+// ============ EDIT / DELETE ============
+function openEdit(id) {
+  editingQRId = id;
+  fetch('/api/qrs').then(r => r.json()).then(qrs => {
+    const qr = qrs.find(q => q._id === id);
+    if (!qr) return;
+    document.getElementById('editName').value = qr.name;
+    document.getElementById('editContent').value = qr.content;
+    document.getElementById('editModal').classList.add('active');
+  });
+}
+function closeEditModal() {
+  document.getElementById('editModal').classList.remove('active');
+  editingQRId = null;
+}
+async function saveEdit() {
+  if (!editingQRId) return;
+  const name = document.getElementById('editName').value.trim();
+  const content = document.getElementById('editContent').value.trim();
+  if (!name || !content) { alert('Fill all fields'); return; }
+  await fetch(`/api/qrs/${editingQRId}`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ name, content })
+  });
+  closeEditModal();
+  loadQRs();
+}
+async function deleteQR(id) {
+  if (!confirm('Delete this QR code?')) return;
+  await fetch(`/api/qrs/${id}`, { method: 'DELETE' });
+  loadQRs();
+}
+
+// ============ ANALYTICS ============
+async function loadAnalyticsSelect() {
+  try {
+    const res = await fetch('/api/qrs');
+    const qrs = await res.json();
+    const select = document.getElementById('analyticsSelect');
+    select.innerHTML = '<option value="">Select a QR code to view analytics</option>' +
+      qrs.map(qr => `<option value="${qr._id}">${escapeHtml(qr.name)} (${qr.scans || 0} scans)</option>`).join('');
+  } catch (e) { console.error(e); }
+}
+document.getElementById('analyticsSelect').addEventListener('change', e => {
+  if (e.target.value) loadAnalytics(e.target.value);
+  else hideAnalytics();
+});
+async function loadAnalytics(id) {
+  try {
+    const res = await fetch(`/api/qrs/${id}/analytics`);
+    const data = await res.json();
+    showAnalytics(data);
+  } catch (e) { console.error(e); hideAnalytics(); }
+}
+function showAnalytics(data) {
+  document.getElementById('analyticsEmpty').style.display = 'none';
+  document.getElementById('analyticsStats').style.display = 'grid';
+  document.getElementById('analyticsCharts').style.display = 'grid';
+  document.getElementById('recentScansCard').style.display = 'block';
+
+  document.getElementById('statTotal').textContent = data.total;
+  document.getElementById('statToday').textContent = data.today;
+  document.getElementById('statDevice').textContent = Object.entries(data.byDevice).sort((a,b)=>b[1]-a[1])[0]?.[0] || '-';
+  document.getElementById('statBrowser').textContent = Object.entries(data.byBrowser).sort((a,b)=>b[1]-a[1])[0]?.[0] || '-';
+
+  renderBarChart(data.last7);
+  renderPieChart(data.byDevice, 'chartDevice', 'legendDevice');
+  renderPieChart(data.byBrowser, 'chartBrowser', 'legendBrowser');
+  renderPieChart(data.byOS, 'chartOS', 'legendOS');
+  renderRecentScans(data);
+}
+function hideAnalytics() {
+  document.getElementById('analyticsEmpty').style.display = 'block';
+  document.getElementById('analyticsStats').style.display = 'none';
+  document.getElementById('analyticsCharts').style.display = 'none';
+  document.getElementById('recentScansCard').style.display = 'none';
+}
+function renderBarChart(last7) {
+  const container = document.getElementById('chartDays');
+  const max = Math.max(...Object.values(last7), 1);
+  container.innerHTML = Object.entries(last7).map(([date, val]) => {
+    const h = Math.max(4, (val / max) * 140);
+    const label = new Date(date).toLocaleDateString('en', { weekday: 'short' });
+    return `<div class="bar-item"><div class="bar" style="height:${h}px"></div><div class="bar-label">${label}</div><div class="bar-value">${val}</div></div>`;
+  }).join('');
+}
+function renderPieChart(data, chartId, legendId) {
+  const total = Object.values(data).reduce((a,b)=>a+b,0) || 1;
+  const colors = ['#6366f1','#22c55e','#f59e0b','#ef4444','#8b5cf6','#ec4899','#06b6d4'];
+  let offset = 0;
+  const circumference = 2 * Math.PI * 70;
+
+  const svg = document.querySelector(`#${chartId} .pie-progress`);
+  const legend = document.getElementById(legendId);
+
+  if (!svg) return;
+
+  let paths = '';
+  let legends = '';
+  let i = 0;
+  for (const [label, val] of Object.entries(data)) {
+    const pct = val / total;
+    const dash = pct * circumference;
+    const color = colors[i % colors.length];
+    paths += `<circle class="pie-progress" cx="80" cy="80" r="70" stroke="${color}" stroke-width="12" fill="none" stroke-dasharray="${dash} ${circumference - dash}" stroke-dashoffset="${offset}" style="transform:rotate(-90deg);transform-origin:80px 80px"></circle>`;
+    offset += dash;
+    legends += `<div class="legend-item"><div class="legend-color" style="background:${color}"></div><span>${escapeHtml(label)} <span style="color:var(--text-muted)">(${val})</span></span></div>`;
+    i++;
+  }
+  // Need to replace the single pie-progress with multiple
+  const pieContainer = document.getElementById(chartId);
+  pieContainer.innerHTML = `<svg class="pie-svg" viewBox="0 0 160 160">${paths}</svg><div class="pie-legend" id="${legendId}">${legends}</div>`;
+}
+function renderRecentScans(data) {
+  // We don't have individual scans in the API response, so skip for now
+}
+
+// ============ VIEW ANALYTICS ============
+function viewAnalytics(id) {
+  document.getElementById('analyticsSelect').value = id;
+  loadAnalytics(id);
+  switchTab('analytics');
+}
+
+window.addEventListener('click', e => {
+  if (e.target === document.getElementById('editModal')) closeEditModal();
+});
+</script>
+<script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
+<script>
+  // QRCode library polyfill for toCanvas
+  if (typeof QRCode === 'undefined' && typeof qrcode !== 'undefined') {
+    window.QRCode = qrcode;
+  }
+  // Polyfill for toCanvas if using qrcodejs
+  if (window.QRCode && !window.QRCode.toCanvas) {
+    window.QRCode.toCanvas = async (canvas, text, opts) => {
+      const qr = new QRCode(document.createElement('div'), { text, width: opts.width, height: opts.height, colorDark: opts.color.dark, colorLight: opts.color.light, correctLevel: QRCode.CorrectLevel.M });
+      await new Promise(r => setTimeout(r, 50));
+      const img = qr._el.querySelector('img');
+      if (img) {
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+      }
+    };
+  }
+</script>
+</body>
+</html>

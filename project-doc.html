@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<style>
+@page{size:A4;margin:0}
+*{margin:0;padding:0;box-sizing:border-box}
+body{width:794px;height:1123px;font-family:'Segoe UI',system-ui,sans-serif;background:#fff;color:#1e293b;overflow:hidden}
+.header{background:linear-gradient(135deg,#0f0f23,#2d1b69);padding:40px 50px;color:#fff}
+.header h1{font-size:28px;font-weight:800;margin-bottom:4px}
+.header h1 span{color:#a5b4fc}
+.header p{color:#94a3b8;font-size:13px}
+.badge{display:inline-block;background:rgba(99,102,241,0.2);border:1px solid rgba(99,102,241,0.4);border-radius:4px;padding:2px 10px;font-size:11px;color:#a5b4fc;margin-top:8px}
+.section{padding:28px 50px}
+.section-title{font-size:16px;font-weight:700;color:#6366f1;text-transform:uppercase;letter-spacing:1px;margin-bottom:16px;border-bottom:2px solid #e2e8f0;padding-bottom:6px}
+.two-col{display:flex;gap:30px}
+.col{flex:1}
+.feature-list{list-style:none}
+.feature-list li{padding:6px 0;font-size:13px;color:#475569;display:flex;align-items:flex-start;gap:8px}
+.feature-list li::before{content:'✓';color:#22c55e;font-weight:700;flex-shrink:0}
+.tech-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.tech-item{background:#f8fafc;border:1px solid #e2e8f0;border-radius:6px;padding:10px 14px}
+.tech-label{font-size:10px;color:#94a3b8;text-transform:uppercase;letter-spacing:0.5px}
+.tech-value{font-size:13px;font-weight:600;color:#1e293b;margin-top:2px}
+.stats-row{display:flex;gap:16px;margin-top:12px}
+.stat-box{flex:1;background:linear-gradient(135deg,#6366f1,#8b5cf6);border-radius:8px;padding:14px;text-align:center;color:#fff}
+.stat-num{font-size:22px;font-weight:800}
+.stat-label{font-size:10px;opacity:0.8;text-transform:uppercase;letter-spacing:0.5px}
+.table{width:100%;border-collapse:collapse;margin-top:10px;font-size:12px}
+.table th{background:#6366f1;color:#fff;padding:8px 12px;text-align:left;font-weight:600}
+.table td{padding:8px 12px;border-bottom:1px solid #e2e8f0}
+.table tr:nth-child(even){background:#f8fafc}
+.footer{position:absolute;bottom:0;left:0;right:0;background:#f8fafc;border-top:1px solid #e2e8f0;padding:16px 50px;display:flex;justify-content:space-between;align-items:center;font-size:11px;color:#64748b}
+.footer span{color:#6366f1;font-weight:600}
+</style>
+</head>
+<body>
+<div class="header">
+  <h1>QRCode Analytics <span>— Project Documentation</span></h1>
+  <p>Visual QR code generator with dynamic links, real-time analytics, and scan tracking</p>
+  <div class="badge">Node.js • Express • QRCode Library • Vanilla JS</div>
+</div>
+<div class="section">
+  <div class="section-title">Project Overview</div>
+  <p style="font-size:13px;color:#475569;line-height:1.6;margin-bottom:16px">
+    A complete QR code generator with analytics dashboard. Features 7 QR types, custom styling, dynamic links, and real-time scan tracking with device/browser/OS detection. Built from scratch with zero external charting libraries.
+  </p>
+  <div class="stats-row">
+    <div class="stat-box"><div class="stat-num">7</div><div class="stat-label">QR Types</div></div>
+    <div class="stat-box"><div class="stat-num">3</div><div class="stat-label">Tabs</div></div>
+    <div class="stat-box"><div class="stat-num">1</div><div class="stat-label">Click Export</div></div>
+    <div class="stat-box"><div class="stat-num">0</div><div class="stat-label">Dependencies</div></div>
+  </div>
+</div>
+<div class="section">
+  <div class="two-col">
+    <div class="col">
+      <div class="section-title">Key Features</div>
+      <ul class="feature-list">
+        <li>7 QR types: URL, Text, Email, Phone, SMS, WiFi, vCard</li>
+        <li>Custom colors, size, and logo upload</li>
+        <li>Dynamic links — change destination anytime</li>
+        <li>PNG & SVG export at custom resolution</li>
+        <li>Real-time scan analytics dashboard</li>
+        <li>Device, browser, OS breakdown</li>
+        <li>7-day trend charts</li>
+        <li>Save/load/manage multiple QR codes</li>
+        <li>Dynamic links — update destination anytime</li>
+        <li>Clean, production-ready code</li>
+      </ul>
+    </div>
+    <div class="col">
+      <div class="section-title">Tech Stack</div>
+      <div class="tech-grid">
+        <div class="tech-item"><div class="tech-label">Backend</div><div class="tech-value">Node.js + Express</div></div>
+        <div class="tech-item"><div class="tech-label">Frontend</div><div class="tech-value">Vanilla JavaScript</div></div>
+        <div class="tech-item"><div class="tech-label">QR Library</div><div class="tech-value">QRCode.js</div></div>
+        <div class="tech-item"><div class="tech-label">Storage</div><div class="tech-value">JSON (file-based)</div></div>
+        <div class="tech-item"><div class="tech-label">Charts</div><div class="tech-value">Canvas + CSS</div></div>
+        <div class="tech-item"><div class="tech-label">Icons</div><div class="tech-value">Font Awesome 6</div></div>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="section">
+  <div class="section-title">QR Types Supported</div>
+  <div class="two-col">
+    <div class="col">
+      <ul class="feature-list">
+        <li><strong>URL</strong> — Website links, landing pages</li>
+        <li><strong>Text</strong> — Plain text, codes, messages</li>
+        <li><strong>Email</strong> — mailto: with subject/body</li>
+        <li><strong>Phone</strong> — tel: links for click-to-call</li>
+      </ul>
+    </div>
+    <div class="col">
+      <ul class="feature-list">
+        <li><strong>SMS</strong> — Pre-filled text messages</li>
+        <li><strong>WiFi</strong> — SSID + password for auto-connect</li>
+        <li><strong>vCard</strong> — Contact cards with name, org, phone, email</li>
+      </ul>
+    </div>
+  </div>
+</div>
+<div class="section">
+  <div class="section-title">API Endpoints</div>
+  <table class="table">
+    <tr><th>Method</th><th>Endpoint</th><th>Description</th></tr>
+    <tr><td>GET</td><td>/api/qrs</td><td>List all QR codes</td></tr>
+    <tr><td>POST</td><td>/api/qrs</td><td>Create new QR code</td></tr>
+    <tr><td>PUT</td><td>/api/qrs/:id</td><td>Update QR code</td></tr>
+    <tr><td>DELETE</td><td>/api/qrs/:id</td><td>Delete QR code</td></tr>
+    <tr><td>GET/POST</td><td>/api/qrs/:id/generate</td><td>Generate PNG/SVG image</td></tr>
+    <tr><td>GET</td><td>/scan/:id</td><td>Track scan & redirect</td></tr>
+    <tr><td>GET</td><td>/api/qrs/:id/analytics</td><td>Get scan analytics</td></tr>
+  </table>
+</div>
+<div class="footer">
+  <div>Built by <span>Markanti Hanmanth</span> • hanmanthmarkanti@gmail.com</div>
+  <div>QRCode Analytics v1.0</div>
+</div>
+</body>
+</html>
