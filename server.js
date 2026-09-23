@@ -19,7 +19,7 @@ app.use((req, res, next) => {
   res.setHeader('X-XSS-Protection', '1; mode=block');
   next();
 });
-app.use(express.static('public'));
+app.use(express.static(path.join(__dirname, 'public')));
 
 function readJSON(file, fallback = []) {
   try {
@@ -210,8 +210,12 @@ app.get('/api/qrs/:id/analytics', (req, res) => {
   res.json({ total, today: todayScans, byDevice, byBrowser, byOS, last7 });
 });
 
-app.listen(PORT, () => {
-  console.log(`\n  QRCode Analytics v1.0`);
-  console.log(`  Server: http://localhost:${PORT}`);
-  console.log(`  Dashboard: http://localhost:${PORT}\n`);
-});
+module.exports = app;
+
+if (require.main === module) {
+  app.listen(PORT, () => {
+    console.log(`\n  QRCode Analytics v1.0`);
+    console.log(`  Server: http://localhost:${PORT}`);
+    console.log(`  Dashboard: http://localhost:${PORT}\n`);
+  });
+}

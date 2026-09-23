@@ -5,3 +5,5 @@ node_modules/
 Thumbs.db
 data/*.json
 !data/.gitkeep
+
+.vercel
